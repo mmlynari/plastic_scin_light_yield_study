@@ -3,13 +3,13 @@ light yield response of scintillating plastic tiles using measurements of cosmic
 
 **recommended directory structure:**
 --working_directory  
-	|  
-	|--csv  
-	|--root  
-	|--comb_root  
-		|  
-		|--ph_spectrum  
-		|--vavilov  
+----|  
+----|--csv  
+----|--root  
+----|--comb_root  
+--------|  
+--------|--ph_spectrum  
+--------|--vavilov  
 
 **first steps:**
 - raw data format: One .csv file per event
