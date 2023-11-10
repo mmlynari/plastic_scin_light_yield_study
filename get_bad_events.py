@@ -19,7 +19,7 @@ def get_event_nr(filename):
 	tree_name = filename.split("/")[-1]
 	event_nr = 0
 	test = "bla"
-	event_nr_str = tree_name.replace("tek","").replace("CH1.csv","")
+	event_nr_str = tree_name.replace("tek","").replace("CH2.csv","")
 	# event_nr_str = tree_name.replace("tek","").replace("ALL.csv","")
 	# print(event_nr_str)
 	if event_nr_str == "0000":
@@ -58,12 +58,12 @@ def get_event_nr(filename):
 # nameSource = "muons_tile10_05mFibre_107"
 # nameSource = "muons_tile10_05mFibre_108"
 # nameSource = "muons_tile10_05mFibre_109" **
-nameSource = "cosmics_middle_50"
+nameSource = "8Nov2023"
 
 print("check %s"%nameSource)
 
 # get list of filenames
-file_list = glob.glob("./csv/"+nameSource+"/*.csv")
+file_list = glob.glob("/eos/user/t/tilepmt/SiPM/data/csv/"+nameSource+"/*.csv")
 # print(file_list)
 
 # df_list = []
@@ -75,7 +75,7 @@ for name in file_list:
 		# df_list.append(csv2pd(name))
 		df = csv2pd(name)
 		n_bins = len(df)
-		if n_bins < 10000:
+		if n_bins < 1000:
 			print("not enough bins: n_bins = %d"%n_bins)
 			print(event_nr)
 			bad_events.append(event_nr)
