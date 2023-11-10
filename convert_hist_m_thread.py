@@ -13,6 +13,9 @@ import pandas as pd
 ###### GLOBALS ########
 #######################
 
+## on lxplus need to install pandas locally 
+## pip3 install pandas //user
+
 r.gROOT.SetBatch(True)
 r.gStyle.SetOptStat(0);
 r.gStyle.SetLineScalePS(2);
@@ -52,7 +55,8 @@ def max_inRange(h_Wave,t1,t2,bl):
     h_Wave.Fit("f_const","RNQ","",r1,r2) # fit constant
     max = f_const.GetParameter(0) - bl # substract baseline
 
-    h_Wave.GetXaxis().UnZoom()
+    ## TBD comment back
+    #h_Wave.GetXaxis().UnZoom()
 
     return(max)
 
@@ -62,7 +66,7 @@ def t_max_inRange(h_Wave,t1,t2):
 
     h_Wave.GetXaxis().SetRangeUser(t1,t2)
     t_max = h_Wave.GetXaxis().GetBinCenter( h_Wave.GetMaximumBin() )
-    h_Wave.GetXaxis().UnZoom()
+    #h_Wave.GetXaxis().UnZoom()
 
     return(t_max)
 
@@ -189,16 +193,16 @@ directory = os.path.join( os.getcwd() )
 out_directory = directory
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--name', type=str, help='Specify name of measurement.')
+parser.add_argument('--inputFolder', type=str, help='Specify name of the input folder with csv files.')
 parser.add_argument('--events', type=int, default = 10000, help='Specify the number of events.')
 parser.add_argument('--nanoSec', type=float, default=40, help='Specify the integration time.')
 parser.add_argument('--isCalib', type=int, default=0, help='Specify if (1) or if not (0) charge/amplitude should be converted to N_pe.')
 
 args, _ = parser.parse_known_args()
 
-measure = "/csv/"+args.name #DC" #topTile_10mV"#noSignal" #600muV" #800muV/SiPM" #50Ohm"
+inputDir = "/eos/user/t/tilepmt/SiPM/data/csv/"+args.inputFolder #DC" #topTile_10mV"#noSignal" #600muV" #800muV/SiPM" #50Ohm"
 
-root_dir = str(out_directory+measure).replace('csv', 'root')
+root_dir = str(out_directory).replace('csv', 'root')
 if not os.path.isdir(root_dir):
     os.system("mkdir -p %s"%root_dir)
 newfile = str(root_dir+"/ntuple_integral_"+str(int(args.nanoSec))+"ns_"+str(args.events)+"ev"+"_calib"+str(args.isCalib))+".root"
@@ -252,11 +256,11 @@ else:
 
 # get x-axis range
 try:
-    temp_hist_df = csv2pd(out_directory+measure+"/tek0003CH1.csv")
-    strip_suffix = "CH1.root"
+    temp_hist_df = csv2pd(inputDir+"/tek0003CH2.csv")
+    strip_suffix = "CH2.root"
     pass
-except FileNotFoundError:
-    temp_hist_df = csv2pd(out_directory+measure+"/tek0003ALL.csv")
+except:
+    temp_hist_df = csv2pd(inputDir+"/tek0003ALL.csv")
     strip_suffix = "ALL.root"
     pass
 
@@ -344,8 +348,9 @@ def analyze_hist(filename):
     tree.Branch('t_trig_fall', t_trig_fall, "t_trig_fall/D")
     tree.Branch('trig_length', trig_length, "trig_length/D")
 
-    # get run number
-    run_nr[0] = int(args.name.split("_")[-1])
+    # get run number - TBD need different format of input folders if we want to use this 
+    run_nr[0] = 1
+    # run_nr[0] = int(args.name.split("_")[-1])
     # print(run_nr)
 
     # read csv to pandas dataframe to root histogram
@@ -518,7 +523,7 @@ def analyze_hist(filename):
     outfile.Close()
 
 # get list of filenames
-file_list = glob.glob(out_directory+measure+'/*.csv')
+file_list = glob.glob(inputDir+'/*.csv')
 
 # number of parallel threads, depends on CPU cores
 pool = Pool(processes=10) 
