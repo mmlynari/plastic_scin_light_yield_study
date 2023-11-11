@@ -205,8 +205,8 @@ inputDir = "/eos/user/t/tilepmt/SiPM/data/csv/"+args.inputFolder #DC" #topTile_1
 root_dir = str(out_directory).replace('csv', 'root')
 if not os.path.isdir(root_dir):
     os.system("mkdir -p %s"%root_dir)
-newfile = str(root_dir+"/ntuple_integral_"+str(int(args.nanoSec))+"ns_"+str(args.events)+"ev"+"_calib"+str(args.isCalib))+".root"
-print(newfile)
+outFileAllEvts = str(root_dir+"/ntuple_integral_"+str(int(args.nanoSec))+"ns_"+str(args.events)+"ev"+"_calib"+str(args.isCalib))+".root"
+print(outFileAllEvts)
 
 # directory to store waveforms
 hist_dir = str(root_dir+"/waveforms")
@@ -299,7 +299,7 @@ def analyze_hist(filename):
 
     # event tree
     tree_name = filename.replace("csv","root").split("/")[-1]
-    outfile = r.TFile( event_tree_dir+"/"+tree_name, 'recreate')
+    outFilePerEvt = r.TFile( event_tree_dir+"/"+tree_name, 'recreate')
     tree = r.TTree('ntuple', 'ntuple')
 
     # extrct event number form tree_name
@@ -519,8 +519,8 @@ def analyze_hist(filename):
 
     # write event tree
     tree.Write()        
-    outfile.Write()
-    outfile.Close()
+    outFilePerEvt.Write()
+    outFilePerEvt.Close()
 
 # get list of filenames
 file_list = glob.glob(inputDir+'/*.csv')
@@ -534,7 +534,7 @@ pool.map(analyze_hist,file_list[0:args.events])
 ######################
 
 # store all event trees in combined root file
-sum_hist_SiPM = r.TH1D("sum_hist_SiPM","sum_hist_SiPM",10000,waves_x_min,waves_x_max)
+sum_hist_SiPM = r.TH1D("sum_hist_SiPM","sum_hist_SiPM",1000,waves_x_min,waves_x_max)
 # sum_hist_SiPM = r.THStack("sum_hist_SiPM","sum of SiPM waveforms;time [ns]")
 
 chain = r.TChain("ntuple")
@@ -558,8 +558,8 @@ for i in range(0,args.events):
     #     event_file.Close()
     #     del temp_h
 
-chain.Merge(newfile)
-# new_tree = r.TFile.Open(newfile,"update")
+chain.Merge(outFileAllEvts)
+# new_tree = r.TFile.Open(outFileAllEvts,"update")
 # sum_hist_SiPM.Draw()
 # sum_hist_SiPM.Write()
 # new_tree.Close()
@@ -577,7 +577,7 @@ chain.Merge(newfile)
 #     r.gPad.SaveAs(hist_dir+"/sum_wave.pdf","pdf")
 
 
-# merge_command = "hadd -f -k {0} {1}/*ALL.root".format(newfile,root_dir)
+# merge_command = "hadd -f -k {0} {1}/*ALL.root".format(outFileAllEvts,root_dir)
 # # subprocess.run(merge_command)
 # os.system(merge_command)
 # sys.exit("done")
