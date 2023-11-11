@@ -20,19 +20,20 @@ light yield response of scintillating plastic tiles using measurements of cosmic
 	- store raw data in working_directory/csv
 - raw data handling:
 	- convert .csv to pandas dataframe
-	- convert dataframe to ROOT histogram
-	- analyze histogram and store computed observables in ROOT file
+	- convert dataframe to ROOT histograms
+	- analyze histograms and store computed observables in a ROOT file
 	- ROOT files are stored in working_directory/root
-- execute all software tools from working directory 
+- execute all software tools from the working directory
+- NOTE: on lxplus need to install pandas locally --> pip3 install pandas //user
 
-**work flow:**
-1. check for potential corrupted .csv files using get_bad_events.py
-2. create run list using run_list.sh -> executes next step
-2. read in all events (.csv files) and create ROOT file with observables using convert_hist_m_thread.py. this is done using python multi-threading package subprocess -> 1 thread per event
+**workflow:**
+1. check for potentially corrupted .csv files using get_bad_events.py
+2. create a run list using run_list.sh -> executes next step
+2. read in all events (.csv files) and create a ROOT file with observables using convert_hist_m_thread.py. this is done using python multi-threading package subprocess -> 1 thread per event
 3. combine multiple runs to single ROOT file using combine_tree.sh (identify runs using run_nr variable), store new ROOT files in working_directory/comb_root
 4. calibrate SiPM pulse-height spectrum (signal integral -> variable: charge_alt) using fit_charge.C and fit_charge.sh, store in working_directory/comb_root/ph_spectrum
 5. re-run convert_hist_m_thread.py with calibration values, re-run combine_tree.sh
-6. extract most probable light yield value (MVP) from data sets using fit_vavilov.C and fit_vavilov.sh, store in working_directory/comb_root/vavilov
+6. extract the most probable light yield value (MVP) from data sets using fit_vavilov.C and fit_vavilov.sh, store in working_directory/comb_root/vavilov
 8. misc. tools:   
 	8.1 plot calibrated dark count and SiPM signal integral distributions -> show_charge.py and show_DC.py  
 	8.2 plot single pulse-height spectrum: plot_ph.C (execute with interactive ROOT)  
