@@ -60,7 +60,7 @@ data_list=(
 	# "\n--nanoSec $setWindow --isCalib $setCalib --events 5716 --name cosmics_middle_48"
 	# "\n--nanoSec $setWindow --isCalib $setCalib --events $setEvents  --name cosmics_middle_49"
 	# "\n--nanoSec $setWindow --isCalib $setCalib --events 9242 --name cosmics_middle_50"
-	"\n--nanoSec $setWindow --isCalib $setCalib --events 100 --inputFolder 8Nov2023"
+	"\n--nanoSec $setWindow --isCalib $setCalib --events $setEvents --inputFolder 8Nov2023"
 
 	
 	) 
