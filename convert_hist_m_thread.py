@@ -13,9 +13,6 @@ import pandas as pd
 ###### GLOBALS ########
 #######################
 
-## on lxplus need to install pandas locally 
-## pip3 install pandas //user
-
 r.gROOT.SetBatch(True)
 r.gStyle.SetOptStat(0);
 r.gStyle.SetLineScalePS(2);
@@ -55,7 +52,7 @@ def max_inRange(h_Wave,t1,t2,bl):
     h_Wave.Fit("f_const","RNQ","",r1,r2) # fit constant
     max = f_const.GetParameter(0) - bl # substract baseline
 
-    ## TBD comment back
+    ## mmlynari needs to comment back 
     #h_Wave.GetXaxis().UnZoom()
 
     return(max)
@@ -158,7 +155,7 @@ def cfd_t_fall(h_Wave,thr):
 # read csv file
 # write to pandas dataframe
 def csv2pd(csv_file):
-    data = pd.read_csv(csv_file,delimiter=",",names = ["time", "amp_sipm","amp_trigger"],skiprows=21)
+    data = pd.read_csv(csv_file,delimiter=",",names = ["time", "amp_sipm", "amp_trigger"],skiprows=21)
     data["time"] = data["time"].multiply(10**9) # convert time to nanoseconds
     if len( data["amp_trigger"].dropna() ) == 0 : # trigger included in data set ?
         data = data.drop(["amp_trigger"],axis=1)
@@ -200,13 +197,15 @@ parser.add_argument('--isCalib', type=int, default=0, help='Specify if (1) or if
 
 args, _ = parser.parse_known_args()
 
-inputDir = "/eos/user/t/tilepmt/SiPM/data/csv/"+args.inputFolder #DC" #topTile_10mV"#noSignal" #600muV" #800muV/SiPM" #50Ohm"
+inputDir = "/eos/user/t/tilepmt/SiPM/data/csv/"+args.inputFolder 
+#DC" #topTile_10mV"#noSignal" #600muV" #800muV/SiPM" #50Ohm"
+print(inputDir)
 
 root_dir = str(out_directory).replace('csv', 'root')
 if not os.path.isdir(root_dir):
     os.system("mkdir -p %s"%root_dir)
-outFileAllEvts = str(root_dir+"/ntuple_integral_"+str(int(args.nanoSec))+"ns_"+str(args.events)+"ev"+"_calib"+str(args.isCalib))+".root"
-print(outFileAllEvts)
+outFileCombined = str(root_dir+"/ntuple_integral_"+str(int(args.nanoSec))+"ns_"+str(args.events)+"ev"+"_calib"+str(args.isCalib))+".root"
+print(outFileCombined)
 
 # directory to store waveforms
 hist_dir = str(root_dir+"/waveforms")
@@ -228,7 +227,7 @@ else:
     print("calibrate to N_pe? NO")
 
 # ___ SETTINGS ___
-wave_print_rate = 1000
+wave_print_rate = 1
 print_sum = 0
 
 is_newSiPM = 1 # 1 -> 1325CS SiPM
@@ -259,6 +258,7 @@ try:
     temp_hist_df = csv2pd(inputDir+"/tek0003CH2.csv")
     strip_suffix = "CH2.root"
     pass
+#except FileNotFoundError:
 except:
     temp_hist_df = csv2pd(inputDir+"/tek0003ALL.csv")
     strip_suffix = "ALL.root"
@@ -275,10 +275,14 @@ amp_range_l = -500
 amp_range_u = 0
 dc_point = waves_x_min+5+0.25*nanoSec
 bl_window = 300
+# array of the values in the range between dc_point+nanoSec and waves_x_max-bl_window spaced by bl_window
 search_bl_array = n.arange(dc_point+nanoSec,waves_x_max-bl_window,bl_window)
+##search_bl_array = n.arange(waves_x_max-3*bl_window,waves_x_max-2*bl_window,bl_window)
 
 print_wf_range_l = waves_x_min
 print_wf_range_u = waves_x_max
+
+#print(print_wf_range_l,print_wf_range_u)
 
 # trigger threshold
 # for time over threshold and trigger time resolution
@@ -348,9 +352,9 @@ def analyze_hist(filename):
     tree.Branch('t_trig_fall', t_trig_fall, "t_trig_fall/D")
     tree.Branch('trig_length', trig_length, "trig_length/D")
 
-    # get run number - TBD need different format of input folders if we want to use this 
+    # get run number
     run_nr[0] = 1
-    # run_nr[0] = int(args.name.split("_")[-1])
+    ## int(args.inputFolder.split("_")[-1])
     # print(run_nr)
 
     # read csv to pandas dataframe to root histogram
@@ -378,12 +382,12 @@ def analyze_hist(filename):
     min_chi2 = 10
     offset = 0
     for i in search_bl_array:
-
+        #print(i)
         t1 = i
         t2 = i + bl_window
-        # print("event: %d | WINDOW: %1.1f %1.1f"%(event_nr,t1,t2))
+        #print("event: %d | WINDOW: %1.1f %1.1f"%(event_nr,t1,t2))
         temp_list = bl_fit(h_Wave_list[0],t1,t2)        
-        # print("bl = %1.4f , rchi2 = %1.6f"%(temp_list[0],temp_list[1]))
+        #print("bl = %1.4f , rchi2 = %1.6f"%(temp_list[0],temp_list[1]))
 
         temp_rchi2 = temp_list[1]
         if temp_rchi2 < min_chi2:
@@ -421,6 +425,7 @@ def analyze_hist(filename):
     dc_range_u = dc_point + int(0.75*args.nanoSec)
     dc_charge[0] = ( integral_inRange(h_Wave_list[0],dc_range_l,dc_range_u,0) - 0 ) / calib_factor
     dc_charge_alt[0] = ( integral_inRange_alt(h_Wave_list[0],dc_range_l,dc_range_u,bl_range_l,bl_window) - 0 ) / calib_factor
+    #print("dc_point", dc_point) #360
 
     # trigger time
     if len(h_Wave_list)>1: 
@@ -431,7 +436,9 @@ def analyze_hist(filename):
 
     #___ PRINT WAVEFORMS ____
 
-    if event_nr%wave_print_rate == 0:
+    if event_nr == event_nr and max_amp>0.02: 
+        print(event_nr)
+        print(wave_print_rate)
     # additional filter possible: 
     # if event_nr%wave_print_rate == 0 or dc_charge<-0.7:
         c_waves = r.TCanvas("c_waves","c_waves",600,500)
@@ -512,7 +519,7 @@ def analyze_hist(filename):
             for line in ln_list:
                 line.Draw("same")
 
-        c_waves.Print(hist_dir+"/wave_ev"+str(event_nr)+".pdf")
+        c_waves.Print(hist_dir+"/wave_ev"+str(event_nr)+".png")
 
     # store in ROOT tree
     tree.Fill()
@@ -522,7 +529,7 @@ def analyze_hist(filename):
     outFilePerEvt.Write()
     outFilePerEvt.Close()
 
-# get list of filenames
+# get list of input filenames
 file_list = glob.glob(inputDir+'/*.csv')
 
 # number of parallel threads, depends on CPU cores
@@ -533,7 +540,7 @@ pool.map(analyze_hist,file_list[0:args.events])
 ###### EXPORT ########
 ######################
 
-# store all event trees in combined root file
+# store all event trees in a combined root file
 sum_hist_SiPM = r.TH1D("sum_hist_SiPM","sum_hist_SiPM",1000,waves_x_min,waves_x_max)
 # sum_hist_SiPM = r.THStack("sum_hist_SiPM","sum of SiPM waveforms;time [ns]")
 
@@ -558,8 +565,8 @@ for i in range(0,args.events):
     #     event_file.Close()
     #     del temp_h
 
-chain.Merge(outFileAllEvts)
-# new_tree = r.TFile.Open(outFileAllEvts,"update")
+chain.Merge(outFileCombined)
+# new_tree = r.TFile.Open(outFileCombined,"update")
 # sum_hist_SiPM.Draw()
 # sum_hist_SiPM.Write()
 # new_tree.Close()
@@ -577,7 +584,7 @@ chain.Merge(outFileAllEvts)
 #     r.gPad.SaveAs(hist_dir+"/sum_wave.pdf","pdf")
 
 
-# merge_command = "hadd -f -k {0} {1}/*ALL.root".format(outFileAllEvts,root_dir)
+# merge_command = "hadd -f -k {0} {1}/*ALL.root".format(outFileCombined,root_dir)
 # # subprocess.run(merge_command)
 # os.system(merge_command)
 # sys.exit("done")
