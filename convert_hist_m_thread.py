@@ -233,6 +233,7 @@ print_sum = 0
 is_newSiPM = 1 # 1 -> 1325CS SiPM
 # is_newSiPM = 0 # 0 -> 015C SiPM
 
+## mmlynari check these values
 # calibration & pedestal correction hard coded
 calib_factor_1325CS = 0.073767 # V x ns # 100 ns int. window
 baseline_offset_13325 = 0.00633756 # V x ns
@@ -275,9 +276,9 @@ amp_range_l = -500
 amp_range_u = 0
 dc_point = waves_x_min+5+0.25*nanoSec
 bl_window = 300
-# array of the values in the range between dc_point+nanoSec and waves_x_max-bl_window spaced by bl_window
+## mmlynari array of the values in the range between dc_point+nanoSec and waves_x_max-bl_window spaced by bl_window
 search_bl_array = n.arange(dc_point+nanoSec,waves_x_max-bl_window,bl_window)
-##search_bl_array = n.arange(waves_x_max-3*bl_window,waves_x_max-2*bl_window,bl_window)
+## search_bl_array = n.arange(waves_x_max-3*bl_window,waves_x_max-2*bl_window,bl_window)
 
 print_wf_range_l = waves_x_min
 print_wf_range_u = waves_x_max
@@ -351,10 +352,10 @@ def analyze_hist(filename):
     tree.Branch('t_trig', t_trig, "t_trig/D")
     tree.Branch('t_trig_fall', t_trig_fall, "t_trig_fall/D")
     tree.Branch('trig_length', trig_length, "trig_length/D")
-    
+
     # get run number
     run_nr[0] = 1
-    ## run_nr[0] = int(args.inputFolder.split("_")[-1])
+    ## int(args.inputFolder.split("_")[-1])
     # print(run_nr)
 
     # read csv to pandas dataframe to root histogram
