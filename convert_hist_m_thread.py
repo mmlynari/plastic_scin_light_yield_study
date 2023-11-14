@@ -351,10 +351,10 @@ def analyze_hist(filename):
     tree.Branch('t_trig', t_trig, "t_trig/D")
     tree.Branch('t_trig_fall', t_trig_fall, "t_trig_fall/D")
     tree.Branch('trig_length', trig_length, "trig_length/D")
-
+    
     # get run number
     run_nr[0] = 1
-    ## int(args.inputFolder.split("_")[-1])
+    ## run_nr[0] = int(args.inputFolder.split("_")[-1])
     # print(run_nr)
 
     # read csv to pandas dataframe to root histogram
