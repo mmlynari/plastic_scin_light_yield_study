@@ -2,7 +2,7 @@ import glob, os, sys
 import subprocess
 import csv
 import argparse
-import numpy as n
+import numpy as np
 import ROOT as r
 
 from multiprocessing import Pool
@@ -32,6 +32,7 @@ def bl_fit(h_Wave,t1,t2):
 
     bl_value = f_const.GetParameter(0)
     bl_red_chi2 = f_const.GetChisquare()/f_const.GetNDF()
+    #print('bl_value', bl_value)
 
     bl_info = [bl_value,bl_red_chi2]
     return bl_info
@@ -194,17 +195,19 @@ parser.add_argument('--inputFolder', type=str, help='Specify name of the input f
 parser.add_argument('--events', type=int, default = 10000, help='Specify the number of events.')
 parser.add_argument('--nanoSec', type=float, default=40, help='Specify the integration time.')
 parser.add_argument('--isCalib', type=int, default=0, help='Specify if (1) or if not (0) charge/amplitude should be converted to N_pe.')
+parser.add_argument('--runNr', type=int, default=0, help='Set the run number')
+
 
 args, _ = parser.parse_known_args()
 
-inputDir = "/eos/user/t/tilepmt/SiPM/data/csv/"+args.inputFolder 
+inputDir = "/eos/user/t/tilepmt/SiPM/data/csv/data_10kpoints/"+args.inputFolder 
 #DC" #topTile_10mV"#noSignal" #600muV" #800muV/SiPM" #50Ohm"
 print(inputDir)
 
 root_dir = str(out_directory).replace('csv', 'root')
 if not os.path.isdir(root_dir):
     os.system("mkdir -p %s"%root_dir)
-outFileCombined = str(root_dir+"/ntuple_integral_"+str(int(args.nanoSec))+"ns_"+str(args.events)+"ev"+"_calib"+str(args.isCalib))+".root"
+outFileCombined = str(root_dir+"/ntuple_integral_"+str(int(args.nanoSec))+"ns_"+str(args.events)+"ev"+"_calib"+str(args.isCalib)+"_runNr"+str(args.runNr))+".root"
 print(outFileCombined)
 
 # directory to store waveforms
@@ -277,8 +280,8 @@ amp_range_u = 0
 dc_point = waves_x_min+5+0.25*nanoSec
 bl_window = 300
 ## mmlynari array of the values in the range between dc_point+nanoSec and waves_x_max-bl_window spaced by bl_window
-search_bl_array = n.arange(dc_point+nanoSec,waves_x_max-bl_window,bl_window)
-## search_bl_array = n.arange(waves_x_max-3*bl_window,waves_x_max-2*bl_window,bl_window)
+search_bl_array = np.arange(dc_point+nanoSec,waves_x_max-bl_window,bl_window)
+## search_bl_array = np.arange(waves_x_max-3*bl_window,waves_x_max-2*bl_window,bl_window)
 
 print_wf_range_l = waves_x_min
 print_wf_range_u = waves_x_max
@@ -315,6 +318,7 @@ def analyze_hist(filename):
     if event_nr_str == "0000":
         event_nr_str = event_nr_str.replace(event_nr_str[:3],"")
         event_nr = int(event_nr_str)
+        print("event nr: {0}".format(event_nr))
     else:
         try:
             event_nr_str = event_nr_str.lstrip("0")
@@ -324,19 +328,19 @@ def analyze_hist(filename):
             pass
 
     # initialize variables to store in branch
-    run_nr = n.zeros(1, dtype=int)
-    bl_value = n.zeros(1, dtype=float)
-    bl_int = n.zeros(1, dtype=float)
-    bl_rchi2 = n.zeros(1, dtype=float)
-    charge =  n.zeros(1, dtype=float)
-    charge_alt =  n.zeros(1, dtype=float)
-    dc_charge =  n.zeros(1, dtype=float)
-    dc_charge_alt =  n.zeros(1, dtype=float)
-    max_amp =  n.zeros(1, dtype=float)
-    t_max_amp = n.zeros(1, dtype=float)
-    t_trig =  n.zeros(1, dtype=float)
-    t_trig_fall =  n.zeros(1, dtype=float)
-    trig_length =  n.zeros(1, dtype=float)
+    run_nr = np.zeros(1, dtype=int)
+    bl_value = np.zeros(1, dtype=float)
+    bl_int = np.zeros(1, dtype=float)
+    bl_rchi2 = np.zeros(1, dtype=float)
+    charge =  np.zeros(1, dtype=float)
+    charge_alt =  np.zeros(1, dtype=float)
+    dc_charge =  np.zeros(1, dtype=float)
+    dc_charge_alt =  np.zeros(1, dtype=float)
+    max_amp =  np.zeros(1, dtype=float)
+    t_max_amp = np.zeros(1, dtype=float)
+    t_trig =  np.zeros(1, dtype=float)
+    t_trig_fall =  np.zeros(1, dtype=float)
+    trig_length =  np.zeros(1, dtype=float)
 
     # initialize branches
     tree.Branch('run_nr', run_nr, "run_nr/I")
@@ -353,10 +357,10 @@ def analyze_hist(filename):
     tree.Branch('t_trig_fall', t_trig_fall, "t_trig_fall/D")
     tree.Branch('trig_length', trig_length, "trig_length/D")
 
-    # get run number
-    run_nr[0] = 1
-    ## int(args.inputFolder.split("_")[-1])
-    # print(run_nr)
+    # mmlynari get run number (taken as the last number after _ in the input folder name)
+    ## run_nr[0] = 1
+    run_nr[0] = int(args.inputFolder.split("_")[-1])
+    ## print("run_nr: ", run_nr)
 
     # read csv to pandas dataframe to root histogram
     df = csv2pd(filename)
@@ -372,12 +376,12 @@ def analyze_hist(filename):
     # time of signal maximum
     cloneHist = h_Wave_list[0].Clone() # clone, avoid potential change of histogram ranges
     t_max_amp[0] = t_max_inRange(cloneHist,amp_range_l,amp_range_u)
-    # t_max_amp[0] = t_max_inRange(h_Wave_list[0],amp_range_l,amp_range_u)
+    # t_max_amp = t_max_inRange(h_Wave_list[0],amp_range_l,amp_range_u)
 
     # charge integration window
     # everything is relative to this window
-    int_range_l = t_max_amp - int(0.25*args.nanoSec)
-    int_range_u = t_max_amp + int(0.75*args.nanoSec) 
+    int_range_l = t_max_amp[0] - int(0.25*args.nanoSec)
+    int_range_u = t_max_amp[0] + int(0.75*args.nanoSec) 
 
     # get clean baseline window, scan over waveform
     min_chi2 = 10
@@ -413,13 +417,18 @@ def analyze_hist(filename):
     bl_int[0] = ( integral_inRange(h_Wave_list[0],bl_range_l,bl_range_u,0) - baseline_offset ) / calib_factor
 
     # amplitude
-    max_amp[0] = max_inRange(cloneHist,amp_range_l,amp_range_u,bl_value)
-    # max_amp[0] = max_inRange(h_Wave_list[0],amp_range_l,amp_range_u,bl_value)
-    # print("max_amp = %f"%max_amp)
+    max_amp[0] = max_inRange(cloneHist,amp_range_l,amp_range_u,bl_value[0])
+    # max_amp[0] = max_inRange(h_Wave_list[0],amp_range_l,amp_range_u,bl_value[0])
 
     # charge
     charge[0] = ( integral_inRange(h_Wave_list[0],int_range_l,int_range_u,0) - baseline_offset ) / calib_factor
-    charge_alt[0] = ( integral_inRange_alt(h_Wave_list[0],int_range_l,int_range_u,bl_range_l,bl_window) - baseline_offset ) / calib_factor
+    ## remove events with no signal
+    if abs(charge[0]/(bl_int[0]/3))>1.2:
+        #print('charge[0]  ', charge[0])
+        charge_alt[0] = ( integral_inRange_alt(h_Wave_list[0],int_range_l,int_range_u,bl_range_l,bl_window) - baseline_offset ) / calib_factor
+        #print('charge_alt[0]  ', charge_alt[0])
+    else: 
+        charge_alt[0] = -999.
 
     # dark counts
     dc_range_l = dc_point - int(0.25*args.nanoSec)
@@ -432,14 +441,14 @@ def analyze_hist(filename):
     if len(h_Wave_list)>1: 
         t_trig[0] = cfd(h_Wave_list[1],trig_thr)
         t_trig_fall[0] = cfd_t_fall(h_Wave_list[1],1-trig_thr)
-        trig_length[0] = t_trig_fall-t_trig
+        trig_length[0] = t_trig_fall[0]-t_trig[0]
         # print("t_trig = %f"%t_trig)
 
     #___ PRINT WAVEFORMS ____
 
-    if event_nr == event_nr and max_amp>0.02: 
-        print(event_nr)
-        print(wave_print_rate)
+    if event_nr == event_nr and charge_alt[0]>-999.: 
+        #print("event_nr: ", event_nr)
+        #print("wave_print_rate", wave_print_rate)
     # additional filter possible: 
     # if event_nr%wave_print_rate == 0 or dc_charge<-0.7:
         c_waves = r.TCanvas("c_waves","c_waves",600,500)
@@ -458,18 +467,18 @@ def analyze_hist(filename):
         h_Wave_list[0].DrawCopy()
 
         # baseline
-        ln_bl = r.TLine(bl_range_l,bl_value,bl_range_u,bl_value)
+        ln_bl = r.TLine(bl_range_l,bl_value[0],bl_range_u,bl_value[0])
         # maximum amplitude
-        ln_max_amp = r.TLine(t_max_amp,bl_value,t_max_amp,max_amp)
+        ln_max_amp = r.TLine(t_max_amp[0],bl_value[0],t_max_amp[0],max_amp[0])
         # charge integration window
-        ln_intW_l = r.TLine(int_range_l,bl_value,int_range_l,max_amp)
-        ln_intW_u = r.TLine(int_range_u,bl_value,int_range_u,max_amp)
+        ln_intW_l = r.TLine(int_range_l,bl_value[0],int_range_l,max_amp[0])
+        ln_intW_u = r.TLine(int_range_u,bl_value[0],int_range_u,max_amp[0])
         # dc integration window
-        ln_dcW_l = r.TLine(dc_range_l,bl_value,dc_range_l,max_amp)
-        ln_dcW_u = r.TLine(dc_range_u,bl_value,dc_range_u,max_amp)
+        ln_dcW_l = r.TLine(dc_range_l,bl_value[0],dc_range_l,max_amp[0])
+        ln_dcW_u = r.TLine(dc_range_u,bl_value[0],dc_range_u,max_amp[0])
         # baseline offset integration window
-        ln_blOff_l = r.TLine(offset,bl_value,offset,max_amp)
-        ln_blOff_u = r.TLine(bl_window+offset,bl_value,bl_window+offset,max_amp)
+        ln_blOff_l = r.TLine(offset,bl_value[0],offset,max_amp[0])
+        ln_blOff_u = r.TLine(bl_window+offset,bl_value[0],bl_window+offset,max_amp[0])
 
         ln_bl.SetLineColor(2)
         ln_bl.SetLineStyle(2)
@@ -510,8 +519,8 @@ def analyze_hist(filename):
             h_Wave_list[1].DrawCopy()
 
             # trigger time
-            ln_t_trig = r.TLine(t_trig,0,t_trig,4.5)
-            ln_t_trig_fall = r.TLine(t_trig_fall,0,t_trig_fall,4.5)
+            ln_t_trig = r.TLine(t_trig[0],0,t_trig[0],4.5)
+            ln_t_trig_fall = r.TLine(t_trig_fall[0],0,t_trig_fall[0],4.5)
 
             ln_t_trig.SetLineColor(3)
             ln_t_trig_fall.SetLineColor(3)
@@ -519,8 +528,8 @@ def analyze_hist(filename):
             ln_list = [ln_t_trig,ln_t_trig_fall]
             for line in ln_list:
                 line.Draw("same")
-
-        c_waves.Print(hist_dir+"/wave_ev"+str(event_nr)+".png")
+        #if max_amp[0]>0.04:
+        #c_waves.Print(hist_dir+"/wave_ev"+str(event_nr)+".png")
 
     # store in ROOT tree
     tree.Fill()

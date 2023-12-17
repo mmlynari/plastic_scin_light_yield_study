@@ -12,7 +12,7 @@ do_calib()
 	channel=$0 # currently not needed
 
 	# CALIB
-	f=cosmics_7to16_32to50_1325CS_100ns_isCalib0_newBL
+	f=ntuple_integral_100ns_10000ev_calib0
 	# f=cosmics_1to6_extra_015C_40ns_isCalib0
 
 	./fit_charge $f

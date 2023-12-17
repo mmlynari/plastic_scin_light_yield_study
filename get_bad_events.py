@@ -58,13 +58,18 @@ def get_event_nr(filename):
 # nameSource = "muons_tile10_05mFibre_107"
 # nameSource = "muons_tile10_05mFibre_108"
 # nameSource = "muons_tile10_05mFibre_109" **
-nameSource = "8Nov2023"
+nameSource = "13Nov2023_10kPoints_1"
+# nameSource = "15Nov2023_day_10kpoints_2"
+# nameSource = "15Nov2023_night_10kpoints_3"
+# nameSource = "16Nov2023_night_10kpoints_4"
+# nameSource = "17Nov2023_night_10kpoints_5"
+# nameSource = "19Nov2023_day_10kpoints_6"
 
 print("check %s"%nameSource)
 
 # get list of filenames
-file_list = glob.glob("/eos/user/t/tilepmt/SiPM/data/csv/"+nameSource+"/*.csv")
-# print(file_list)
+file_list = glob.glob("/eos/user/t/tilepmt/SiPM/data/csv/data_10kpoints/"+nameSource+"/*.csv")
+#print(file_list)
 
 # df_list = []
 bad_events = []
@@ -75,7 +80,7 @@ for name in file_list:
 		# df_list.append(csv2pd(name))
 		df = csv2pd(name)
 		n_bins = len(df)
-		if n_bins < 1000:
+		if n_bins < 10000:
 			print("not enough bins: n_bins = %d"%n_bins)
 			print(event_nr)
 			bad_events.append(event_nr)

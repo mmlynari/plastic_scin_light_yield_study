@@ -81,7 +81,8 @@ int main(int argc, char *argv[])
   // style options
   gStyle->SetOptStat(0);
   gStyle->SetOptFit(0);
-  gStyle->SetStatW(0.1); gStyle->SetStatH(0.1); // stats box size
+  gStyle->SetStatW(0.1); 
+  gStyle->SetStatH(0.1); // stats box size
   gStyle->SetGridStyle(3);
   gStyle->SetGridWidth(1);
   gStyle->SetGridColor(16);
@@ -106,7 +107,7 @@ int main(int argc, char *argv[])
   int nBins = (xmax-xmin)*500;
 
   // y-range of calib factor plot
-  double l_values = 0.071, u_values =0.077;
+  double l_values = 0., u_values =1.;
 
   bool print_verb = 1;
   bool print_cf_array = 0;
@@ -132,7 +133,8 @@ int main(int argc, char *argv[])
   h->SetMarkerStyle(7);
   h->SetMarkerColorAlpha(kBlack,0.6);
 
-  TString cut("bl_value<-0.001");
+  //TString cut("bl_value<-0.00001");
+  TString cut("charge_alt>-100.");
   tree->Draw(Form("charge_alt>>h"),cut,"HISTE");
 
   // to show alternative fit
@@ -146,6 +148,8 @@ int main(int argc, char *argv[])
   *****/
   
   // get starting value for gauss mean parameter
+  printf("inside PRE FIT \n");
+
   float pos_peak[n_peaks];
   for (int i = 0; i < n_peaks; ++i)
   {
@@ -170,7 +174,7 @@ int main(int argc, char *argv[])
   /***** 
   __ GENERALIZED POISSON * GAUSS FIT ___________________________
   *****/
-
+  printf("inside GENERALIZED POISSON * GAUSS FIT \n");
   TF1 *f = new TF1("fitf",fitf,-0.08,1.7,7);
   h->GetYaxis()->SetTitle("entries");
   h->GetXaxis()->SetTitle("charge [V #times ns]");
@@ -217,6 +221,7 @@ int main(int argc, char *argv[])
   /***** 
   __ ALTERNATIVE MULTI-GAUSS FIT ___________________________
   *****/
+  printf("inside ALTERNATIVE MULTI-GAUSS FIT \n"); 
   C2->cd();
     // C2->SetTopMargin(0.90);
   // C2->SetBottomMargin(0.12);
@@ -306,7 +311,7 @@ int main(int argc, char *argv[])
   /***** 
   __ SYSTEMATICS ___________________________
   *****/
-
+  printf("inside SYSTEMATICS \n"); 
   double var_sum = 0, calib_factor_sys, calib_factor_err_t;
 
   for (int i = 0; i < n_peaks-2; ++i)
@@ -321,7 +326,7 @@ int main(int argc, char *argv[])
   /***** 
   __ COMPARE MULTI-GAUSS <-> GEN.POISS*GAUSS ___________________________
   *****/
-
+  printf("inside COMPARE \n"); 
   double x_values[n_peaks-1];
   double x_values_err[n_peaks-1];
   for (int i = 0; i < n_peaks-1; ++i)
@@ -401,17 +406,20 @@ int main(int argc, char *argv[])
     printf("%f, ",calib_factor_err );
   }
 
-  string pdf_filename1 = target_path+(string)argv[1]+"_GP_fit.pdf";
-  string pdf_filename2 = target_path+(string)argv[1]+"_contG_fit.pdf";
-  string pdf_filename3 = target_path+(string)argv[1]+"_values.pdf";
+  
+  string pdf_filename1 = target_path+(string)argv[1]+"_GP_fit.png";
+  string pdf_filename2 = target_path+(string)argv[1]+"_contG_fit.png";
+  string pdf_filename3 = target_path+(string)argv[1]+"_values.png";
   string list_filename = target_path+out_list+".txt";
+
 
   FILE * factor_list;
   factor_list = fopen(list_filename.c_str(),"a");
   fprintf(factor_list, "SiPM : 1pe dist: %f ± %f ± %f ± %f  | red. chi2 = %f | %1.2f %%\n",calib_factor,calib_factor_err,calib_factor_sys,calib_factor_err_t,GP_chi2_ndof,rel_err*100 );
   fclose(factor_list);
 
-  gErrorIgnoreLevel = kError; // suppress root terminal output 
+
+  //gErrorIgnoreLevel = kError; // suppress root terminal output 
     C1->Print(pdf_filename1.c_str());
     C2->Print(pdf_filename2.c_str());
     C3->Print(pdf_filename3.c_str());
