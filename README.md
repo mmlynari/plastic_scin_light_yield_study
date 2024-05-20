@@ -1,6 +1,9 @@
 # plastic_scin_light_yield_study
 light yield response of scintillating plastic tiles using measurements of cosmic muons
 
+**SiPM data are stored in** 
+-- /eos/user/t/tilepmt/SiPM/data/csv/data_10kpoints
+
 **recommended directory structure:**  
 --working_directory  
 ----|  
