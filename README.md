@@ -33,7 +33,8 @@ light yield response of scintillating plastic tiles using measurements of cosmic
 1. get_bad_events.py --> check for potentially corrupted .csv files
 2. run_list.sh --> create a run list using + executes next step
 2. convert_hist_m_thread.py --> read in all events (.csv files) and create a ROOT file with observables using. this is done using python multi-threading package subprocess -> 1 thread per event
-3. combine_tree.sh --> combine multiple runs to single ROOT file (identify runs using run_nr variable), store new ROOT files in working_directory/comb_root
+3a. NOT TO BE USED FOR THE MOMENT combine_tree.sh --> combine multiple runs to single ROOT file (identify runs using run_nr variable), store new ROOT files in working_directory/comb_root
+3b. TO BE USED combine multiple output root files into a single root file manually using hadd, store new ROOT files in working_directory/comb_root
 4. calibrate SiPM pulse-height spectrum (signal integral -> variable: charge_alt) using fit_charge.C and fit_charge.sh, store in working_directory/comb_root/ph_spectrum
 5. re-run convert_hist_m_thread.py with calibration values, re-run combine_tree.sh
 6. extract the most probable light yield value (MVP) from data sets using fit_vavilov.C and fit_vavilov.sh, store in working_directory/comb_root/vavilov
