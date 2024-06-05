@@ -422,13 +422,7 @@ def analyze_hist(filename):
 
     # charge
     charge[0] = ( integral_inRange(h_Wave_list[0],int_range_l,int_range_u,0) - baseline_offset ) / calib_factor
-    ## remove events with no signal
-    if abs(charge[0]/(bl_int[0]/3))>1.2:
-        #print('charge[0]  ', charge[0])
-        charge_alt[0] = ( integral_inRange_alt(h_Wave_list[0],int_range_l,int_range_u,bl_range_l,bl_window) - baseline_offset ) / calib_factor
-        #print('charge_alt[0]  ', charge_alt[0])
-    else: 
-        charge_alt[0] = -999.
+    charge_alt[0] = ( integral_inRange_alt(h_Wave_list[0],int_range_l,int_range_u,bl_range_l,bl_window) - baseline_offset ) / calib_factor
 
     # dark counts
     dc_range_l = dc_point - int(0.25*args.nanoSec)
