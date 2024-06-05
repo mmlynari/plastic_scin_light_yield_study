@@ -36,28 +36,7 @@ def get_event_nr(filename):
 			print("ValueError at event {0}".format(event_nr))
 			pass
 	return event_nr
-
-# nameSource = "cosmics_bottom_1"
-# nameSource = "cosmics_bottom_2"
-# nameSource = "cosmics_bottom_3"
-# nameSource = "cosmics_middle_4"
-# nameSource = "cosmics_middle_5"
-# nameSource = "cosmics_middle_6"
-# nameSource = "cosmics_middle_7"
-# nameSource = "cosmics_middle_16"
-# nameSource = "test"
-# nameSource = "test2"
-# nameSource = "test3"
-# nameSource = "muons_tile1_100"**
-# nameSource = "muons_tile1_101" *
-# nameSource = "muons_tile1_102" **
-# nameSource = "muons_tile10_2mFibre_103" **
-# nameSource = "muons_tile10_2mFibre_104" **
-# nameSource = "muons_tile10_2mFibre_105" **
-# nameSource = "muons_tile10_05mFibre_106" XXX
-# nameSource = "muons_tile10_05mFibre_107"
-# nameSource = "muons_tile10_05mFibre_108"
-# nameSource = "muons_tile10_05mFibre_109" **
+	
 nameSource = "13Nov2023_10kPoints_1"
 # nameSource = "15Nov2023_day_10kpoints_2"
 # nameSource = "15Nov2023_night_10kpoints_3"
