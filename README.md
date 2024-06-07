@@ -49,7 +49,7 @@ light yield response of scintillating plastic tiles using measurements of cosmic
 - bl_int -->
 - bl_rchi2 --> chi squared value corresponding to the best constant fit of the baseline (signal pedestal, defined as the fit with the smallest chi squared within the sliding window)
 - charge_alt --> 
-- charge --> total charge in the muon pulse, defined as the integral over an interval covering the main pulse, with 25% of the interval in front of the maximum and 75% behind the maximum
+- charge --> total charge in the main pulse, defined as the integral over an interval covering the main pulse, with 25% of the interval in front of the maximum and 75% behind the maximum
 - dc_charge -->
 - dc_charge_alt -->
 - max_amp --> amplitude of the pulse, defined as the result of a constant fit over +- 0.5 ns around the center of the highest bin
