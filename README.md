@@ -42,3 +42,18 @@ light yield response of scintillating plastic tiles using measurements of cosmic
 	8.1 plot calibrated dark count and SiPM signal integral distributions -> show_charge.py and show_DC.py  
 	8.2 plot single pulse-height spectrum: plot_ph.C (execute with interactive ROOT)  
 	8.3 plot color coded overlay of all waveforms of a measurement run: show_all_WF.py
+
+**output variables in ntuple**
+run_nr --> Number of run, taken as the last number after _ in the input folder
+bl_value --> value of the pedestal fit
+bl_int -->
+bl_rchi2 --> chi squared value corresponding to the best constant fit of the baseline (signal pedestal, defined as the fit with the smallest chi squared within the sliding window)
+charge_alt --> 
+charge --> total charge in the muon pulse, defined as the integral over the 
+dc_charge -->
+dc_charge_alt -->
+max_amp --> amplitude of the pulse, defined as the result of a constant fit over +- 0.5 ns around the center of the highest bin
+t_max_amp --> time position of the signal maximum defined as the center of the highest bin found within a preset range
+t_trig -->
+t_trig_fall -->
+trig_length -->
