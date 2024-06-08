@@ -46,12 +46,12 @@ light yield response of scintillating plastic tiles using measurements of cosmic
 **output variables in ntuple**
 - run_nr --> Number of run, taken as the last number after _ in the input folder
 - bl_value --> value of the pedestal constant fit
-- bl_int -->
+- bl_int --> integral over the baseline window that was determined to contain the best baseline constant fit
 - bl_rchi2 --> chi squared value corresponding to the best constant fit of the baseline (signal pedestal, defined as the fit with the smallest chi squared within the sliding window)
-- charge_alt --> 
-- charge --> total charge in the main pulse, defined as the integral over an interval covering the main pulse, with 25% of the interval in front of the maximum and 75% behind the maximum
-- dc_charge -->
-- dc_charge_alt -->
+- charge_alt --> total charge in the main pulse, corrected by subtracting the integral over the baseline under the main pulse 
+- charge --> total charge in the spectrum over the main pulse, defined as the integral over an interval covering the main pulse, with 25% of the interval in front of the maximum and 75% behind the maximum
+- dc_charge --> total charge in the dark count window
+- dc_charge_alt --> total charge in the dark count window corrected by subtracting the interval over the baseline
 - max_amp --> amplitude of the pulse, defined as the result of a constant fit over +- 0.5 ns around the center of the highest bin
 - t_max_amp --> time position of the signal maximum defined as the center of the highest bin found within a preset range
 - t_trig --> beginning of the trigger pulse
