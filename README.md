@@ -52,7 +52,7 @@ light yield response of scintillating plastic tiles using measurements of cosmic
 - charge --> total charge in the spectrum over the main pulse, defined as the integral over an interval covering the main pulse, with 25% of the interval in front of the maximum and 75% behind the maximum
 - dc_charge --> total charge in the dark count window
 - dc_charge_alt --> total charge in the dark count window corrected by subtracting the interval over the baseline
-- max_amp --> amplitude of the pulse, defined as the result of a constant fit over +- 0.5 ns around the center of the highest bin
+- max_amp --> amplitude of the pulse, defined as the result of a constant fit over +- 0.5 ns around the center of the highest bin. Corrected for the baseline value.
 - t_max_amp --> time position of the signal maximum defined as the center of the highest bin found within a preset range
 - t_trig --> beginning of the trigger pulse
 - t_trig_fall --> end of the trigger pulse
