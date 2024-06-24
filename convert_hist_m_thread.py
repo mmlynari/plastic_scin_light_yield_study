@@ -8,6 +8,7 @@ import ROOT as r
 from multiprocessing import Pool
 import pandas as pd
 
+from numpy.fft import fft #mhaviern - import Fast Fourier Transform from numpy
 
 #######################
 ###### GLOBALS ########
@@ -181,6 +182,26 @@ def pd2hist_list(df):
             counter += 1
         hist_list.append(h_Wave)
     return hist_list
+    
+################################
+###### FOURIER ANALYSIS ########
+################################
+
+sampling_rate = 2500000000 #sampling rate of the oscilloscope, 2.5 GS/s
+
+# mhaviern - Functions for FFT
+def fourier_transform(file):
+    ftrans = fft(file["amp_sipm"])
+    return ftrans
+
+def doxaxis(file):
+    t_axis=file["time"]
+    y_axis=np.abs(fourier_transform(file))
+    N=len(y_axis)
+    n=np.arange(N)
+    T=N/sampling_rate
+    freq=n/T
+    return freq
 
 
 ###########################
@@ -341,6 +362,8 @@ def analyze_hist(filename):
     t_trig =  np.zeros(1, dtype=float)
     t_trig_fall =  np.zeros(1, dtype=float)
     trig_length =  np.zeros(1, dtype=float)
+    fft_ratio = np.zeros(1, dtype=float)
+    fft_peak = np.zeros(1, dtype=float)
 
     # initialize branches
     tree.Branch('run_nr', run_nr, "run_nr/I")
@@ -356,6 +379,8 @@ def analyze_hist(filename):
     tree.Branch('t_trig', t_trig, "t_trig/D")
     tree.Branch('t_trig_fall', t_trig_fall, "t_trig_fall/D")
     tree.Branch('trig_length', trig_length, "trig_length/D")
+    tree.Branch('fft_ratio', fft_ratio, "fft_ratio/D")
+    tree.Branch('fft_peak', fft_peak, "fft_peak/D")
 
     # mmlynari get run number (taken as the last number after _ in the input folder name)
     ## run_nr[0] = 1
@@ -372,6 +397,17 @@ def analyze_hist(filename):
     # print("hist range: %f - %f | event_nr : %d"%(t_low,t_hig,event_nr))
 
     #___ COMPUTE VARIABLES ____
+
+    # do FFT and compute height and ratio of peak at 3 MHz to neighbouring bins - mhaviern
+    fourier_y = fourier_transform(df)
+    fourier_x = doxaxis(df)
+    bin_index = np.where(np.isclose(fourier_x, 3000000))
+    bin_index_l = np.where(np.isclose(fourier_x, 2750000))
+    bin_val = np.abs(fourier_y[12])
+    bin_val_l = np.abs(fourier_y[11])
+    fft_peak[0] = bin_val
+    ratio = bin_val/bin_val_l
+    fft_ratio[0] = ratio
 
     # time of signal maximum
     cloneHist = h_Wave_list[0].Clone() # clone, avoid potential change of histogram ranges
@@ -549,10 +585,17 @@ sum_hist_SiPM = r.TH1D("sum_hist_SiPM","sum_hist_SiPM",1000,waves_x_min,waves_x_
 # sum_hist_SiPM = r.THStack("sum_hist_SiPM","sum of SiPM waveforms;time [ns]")
 
 chain = r.TChain("ntuple")
+true_chain = r.TChain("ntuple")
 root_file_list = glob.glob(event_tree_dir+"/*"+strip_suffix)
 
+# to the final ntuple, only add events that pass the FFT cut
 for i in range(0,args.events):
     chain.Add(root_file_list[i])
+    f = r.TFile(root_file_list[i], 'open')
+    tree = f.Get("ntuple")
+    tree.GetEntry(0)
+    if ( tree.fft_peak < 8 or tree.fft_ratio < 2 ):
+        true_chain.Add(root_file_list[i])
 
     # waveform sum plot not working in the moment...
     
@@ -569,7 +612,7 @@ for i in range(0,args.events):
     #     event_file.Close()
     #     del temp_h
 
-chain.Merge(outFileCombined)
+true_chain.Merge(outFileCombined)
 # new_tree = r.TFile.Open(outFileCombined,"update")
 # sum_hist_SiPM.Draw()
 # sum_hist_SiPM.Write()
